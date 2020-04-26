@@ -1,2 +1,10 @@
 # django-api-advanced
-Practice Advanced Django API Topics : authentication and TDD and Custom User >>> With London App Developer Course on Udemy 
+I Practice Django with some topics :
+### Rest Framework:
+using django `rest_framework` i can vuild Rest Api to serve Front-end and Mobile Apps.
+### TDD Concept:
+Test Driven Development Process is good practice to make a testable code and help me focus on my tasks.
+### Docker.
+
+---
+---
