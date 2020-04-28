@@ -9,7 +9,7 @@ def sample_user(email='te@se.co', password='mypass', name='name'):
         email=email,
         password=password,
         name=name
-        )
+    )
 
 
 class ModelsTest(TestCase):
