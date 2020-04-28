@@ -27,8 +27,7 @@ class TagViewSet(viewsets.GenericViewSet,
         serializer.save(user=self.request.user)
 
 
-
-class IngredientViewSet(viewsets.GenericViewSet,mixins.ListModelMixin):
+class IngredientViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     """Manage ingredients in the databse"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
