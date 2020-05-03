@@ -5,6 +5,7 @@ from django.urls import reverse
 from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 from rest_framework import status
 from rest_framework.test import APIClient
+from decimal import Decimal
 
 RECIPES_URL = reverse('recipe:recipe-list')
 
@@ -156,13 +157,49 @@ class PrivateRecipeApiTest(TestCase):
         }
 
         res = self.client.post(RECIPES_URL, payload)
-
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipe = Recipe.objects.get(id=res.data['id'])
-
         ingredients = recipe.ingredients.all()
 
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ingredients.count(), 2)
-
         self.assertIn(ingredient1, ingredients)
         self.assertIn(ingredient2, ingredients)
+
+    def test_partial_update_recipe(self):
+        """Test Update for existing recipe with patch"""
+        recipe = sample_recipe(user=self.user)
+        recipe.tags.add(sample_tag(user=self.user))
+        new_tag = sample_tag(user=self.user, name='new tag')
+
+        payload = {
+            'title': 'simple ricepi shot',
+            'tags': [new_tag.id]
+        }
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+        recipe.refresh_from_db()
+        self.assertEqual(res.data['title'], payload['title'])
+
+        tags = recipe.tags.all()
+        self.assertEqual(len(tags), 1)
+        self.assertIn(new_tag, tags)
+
+    def test_full_update(self):
+        """Test Update recipe with put"""
+        recipe = sample_recipe(user=self.user)
+        recipe.tags.add(sample_tag(user=self.user))
+        payload = {
+            'title': 'Spaghiti title shit',
+            'time_minutes': 4,
+            'price': Decimal('4.90')
+        }
+        url = detail_url(recipe.id)
+
+        self.client.put(url, payload)
+        recipe.refresh_from_db()
+
+        self.assertEqual(recipe.title, payload['title'])
+        self.assertEqual(recipe.time_minutes, payload['time_minutes'])
+        self.assertEqual(recipe.price, payload['price'])
+        tags = recipe.tags.count()
+        self.assertEqual(tags, 0)
