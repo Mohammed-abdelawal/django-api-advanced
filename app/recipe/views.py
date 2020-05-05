@@ -19,7 +19,7 @@ class BaseRecipeAttrViewSet(viewsets.GenericViewSet,
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
-        """Create new objwct"""
+        """Create new object"""
         serializer.save(user=self.request.user)
 
 
@@ -43,9 +43,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def _params_to_ints(self, qs):
+        """convert a list of string IDs to integers list"""
+        return [int(x) for x in qs.split(',')]
+
     def get_queryset(self):
         """retrive the recipes for the authenticated user"""
-        return self.queryset.filter(user=self.request.user)
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        qs = self.queryset
+        if tags:
+            tag_ids = self._params_to_ints(tags)
+            qs = qs.filter(tags__id__in=tag_ids)
+        if ingredients:
+            ings_ids = self._params_to_ints(ingredients)
+            qs = qs.filter(ingredients__id__in=ings_ids)
+
+        return qs.filter(user=self.request.user)
 
     def get_serializer_class(self):
         """override serializer for detail url"""
